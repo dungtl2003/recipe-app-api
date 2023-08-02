@@ -22,11 +22,11 @@ class Command(BaseCommand):
             try:
                 self.check(databases=['default'])
                 db_up = True
-            except (Psycopg2Error, OperationalError):
-                if tried == max_tries:
+            except (Psycopg2Error, OperationalError) as e:
+                if tried > max_tries:
                     self.stdout.write(self.style.ERROR('Connection failed!'))
-                    return
-                self.stdout.write('Database unavailable, waiting 1 second...')
+                    raise e
+                self.stdout.write(f'Database unavailable, attempting to reconnect ({tried})')
                 time.sleep(1)
                 tried += 1
 
