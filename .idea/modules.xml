@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://D:/Study/Code/Python/MockPractice/.idea/MockPractice.iml" filepath="D:/Study/Code/Python/MockPractice/.idea/MockPractice.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/recipe-app-api.iml" filepath="$PROJECT_DIR$/.idea/recipe-app-api.iml" />
     </modules>
   </component>

@@ -22,9 +22,9 @@ RUN mkdir .venv && \
     apk add --update --no-cache --virtual .tmp-build-deps \
       build-base postgresql-dev musl-dev && \
 	pip install --no-cache-dir pipenv && \
-    pipenv install && \
+    pipenv install --deploy && \
 	if [ ${DEV} = "true" ]; \
-		then pipenv install --dev ; \
+		then pipenv install --dev --deploy ; \
 	fi && \
     apk del .tmp-build-deps && \
 	chmod -R 777 ${APP_HOME} && \
