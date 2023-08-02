@@ -1,0 +1,4 @@
+DB_HOST=postgres
+DB_NAME=devdb
+DB_USER=ilikeblue
+DB_PASS=270403

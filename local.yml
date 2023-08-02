@@ -1,5 +1,8 @@
 version: "3"
 
+volumes:
+  dev-db-data:
+
 services:
   app:
     build:
@@ -8,9 +11,21 @@ services:
       args:
         - DEV=true
     image: django-recipe
+    container_name: django-recipe
     ports:
       - "8000:8000"
     volumes:
       - ./app/:/recipe/app/
+    env_file:
+      - ./.envs/.local/.django
+    depends_on:
+      - db
     command: /recipe/start
 
+  db:
+    image: postgres:15-alpine
+    container_name: recipe-db
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    env_file:
+      - ./.envs/.local/.postgres
