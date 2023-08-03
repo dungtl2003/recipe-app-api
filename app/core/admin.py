@@ -20,6 +20,11 @@ class UserAdmin(BaseUserAdmin):
     # doesn't have title --> None. If a set has a title, it should be in
     # translate function in case you want to have multiple languages in your
     # project. We have to override the fieldsets in order to use custom user.
+
+    # in Django, the fieldsets attribute is used to control the layout of
+    # the admin pages for EDITING AN OBJECT. That means it helps change and
+    # delete object BUT not create. User model must have all attributes in
+    # fieldsets.
     fieldsets = (
         (
             None,
@@ -49,8 +54,35 @@ class UserAdmin(BaseUserAdmin):
             }
         )
     )
-
     readonly_fields = ['last_login']
+
+    # The add_fieldsets attribute is used to control the layout of the admin
+    # pages for CREATING A NEW OBJECT. That means it only helps create, not
+    # change or delete object (oposite of fieldsets). Note that user model
+    # does NOT have to have all attributes in add_fieldsets. But the addition
+    # field will not be saved to the user model.
+    # The 'classes': ('wide') is used to specify the CSS classes. In this
+    # case, it specifies that the fieldset should be displayed with a wider
+    # width than the default.
+    add_fieldsets = (
+        (
+            None,
+            {
+                'classes': (
+                    'wide',
+                ),
+                'fields': (
+                    'email',
+                    'password1',
+                    'password2',
+                    'name',
+                    'is_active',
+                    'is_staff',
+                    'is_superuser',
+                ),
+            }
+        ),
+    )
 
 
 # You must add the second argument if you want to register the user to
