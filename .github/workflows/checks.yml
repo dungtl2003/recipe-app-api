@@ -16,7 +16,7 @@ jobs:
       - name: Checkout # This step will be executed if the first one is executed successfully
         uses: actions/checkout@v2
       - name: Test
-        run: docker compose -f local.yml run --rm app sh -c "python3 manage.py wait_for_db && python3 manage.py test"
+        run: docker compose -f local.yml run --rm app sh -c "python3 manage.py test"
       - name: Lint
         run: docker compose -f local.yml run --rm app sh -c "flake8"
 
