@@ -1,0 +1,76 @@
+"""
+Tests for the user API.
+"""
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+
+# APIClient is the subclass of the Client in django.test. It adds aditional
+# features like POST, PUT, PATCH,... to test request-respone api.
+from rest_framework.test import APIClient
+from rest_framework import status
+
+
+CREATE_USER_URL = reverse('user:create')
+
+
+def create_user(**kwargs):
+    """Create and return a new user."""
+    return get_user_model().objects.create_user(**kwargs)
+
+
+class PublicUserApiTest(TestCase):
+    """Test the public features of the user API."""
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_create_user_success(self):
+        """Test creating a user is successful."""
+        # sample information of the user we want to create.
+        payload = {
+            'email': 'test@example.com',
+            'password': 'testpass123',
+            'name': 'Test Name',
+        }
+        # create user.
+        res = self.client.post(CREATE_USER_URL, payload)
+
+        # assert that we create user successfully.
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        user = get_user_model().objects.get(email=payload['email'])
+        # assert that the database has the user we just created with correct
+        # information by checking the password.
+        self.assertTrue(user.check_password(payload['password']))
+        # assert that password is NOT in data respone because we don't want
+        # return the password or password's hash to the user.
+        # this is for safety purpose.
+        self.assertNotIn('password', res.data)
+
+    def test_user_with_email_exists_error(self):
+        """Test error returned if user with email exists."""
+        payload = {
+            'email': 'test@example.com',
+            'password': 'testpass123',
+            'name': 'Test Name',
+        }
+        create_user(**payload)
+        res = self.client.post(CREATE_USER_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_password_too_short_error(self):
+        """Test an error is returned if password less than 5 chars."""
+        payload = {
+            'email': 'test@example.com',
+            'password': '1234',
+            'name': 'Test Name',
+        }
+        res = self.client.post(CREATE_USER_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        # https://docs.djangoproject.com/en/4.2/ref/models/querysets/#filter
+        user_exists = get_user_model().objects.filter(
+            email=payload['email']
+        ).exists()
+        self.assertFalse(user_exists)
