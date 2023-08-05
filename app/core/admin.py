@@ -89,3 +89,4 @@ class UserAdmin(BaseUserAdmin):
 # your custom admin. If you don't have custom admin then the second argument
 # is optional.
 admin.site.register(models.User, UserAdmin)
+admin.site.register(models.Recipe)
