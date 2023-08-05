@@ -10,6 +10,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
+from user.serializers import UserSerializer
+
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
@@ -141,7 +143,7 @@ class PrivateUserApiTests(TestCase):
             'email': self.user.email,
         })
 
-    def test_post_me_not_alllowed(self):
+    def test_post_me_not_allowed(self):
         """Test POST is not allowed for the "me" endpoint"""
         res = self.client.post(ME_URL, {})
 
