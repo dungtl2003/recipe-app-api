@@ -4,6 +4,7 @@ Database models.
 # AbstractBaseUser contains functionality for auth system, but not fields,
 # PermissionMixin contains functioinality for the permissions and fields
 # needed.
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -50,3 +51,21 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # define field for authentication, default is username, not email.
     USERNAME_FIELD = 'email'
+
+
+class Recipe(models.Model):
+    """Recipe object."""
+    title = models.CharField(max_length=255)
+    time_minutes = models.IntegerField()
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    # blank=True: this field will not be required when the form is submitted.
+    description = models.TextField(blank=True)
+    # link to the recipe.
+    link = models.CharField(max_length=255, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return self.title
