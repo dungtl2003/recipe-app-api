@@ -109,3 +109,12 @@ class PrivateTagApiTests(TestCase):
 
         self.assertEqual(res.data, serializer.data)
         self.assertEqual(tag.name, payload['name'])
+
+    def test_delete_tag(self):
+        """Test deleting a tag."""
+        tag = create_tag(user=self.user, name='Sample tag')
+        url = detail_url(tag.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Tag.objects.filter(id=tag.id).exists())

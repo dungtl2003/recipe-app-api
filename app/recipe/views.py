@@ -78,10 +78,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-# we HAVE TO extend all mixin first and then the base class like
+# In RecipeViewSet, we extend ModelViewSet because we can perform all CRUD
+# operations on recipe. But in TagViewSet, we can not create tag in recipe,
+# tag must be created in user to avoid duplication, so we will use mixins.
+# Note that we HAVE TO extend all mixin first and then the base class like
 # GenericViewSet. Otherwise, it will lose functionalities.
 class TagViewSet(mixins.UpdateModelMixin,
                  mixins.ListModelMixin,
+                 mixins.DestroyModelMixin,
                  viewsets.GenericViewSet):
     """Manage tags in the database."""
     serializer_class = serializers.TagSerializer
