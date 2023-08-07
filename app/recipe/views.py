@@ -26,3 +26,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return serializers.RecipeSerializer
 
         return self.serializer_class
+
+    def perform_create(self, serializer):
+        """Create a new recipe."""
+        # when creating the recipe, the user attr is missing, so we have to
+        # add the current user (the user wants to create recipe) into the
+        # recipe and then save the recipe.
+        serializer.save(user=self.request.user)
