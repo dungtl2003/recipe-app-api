@@ -7,6 +7,7 @@ from core.models import Recipe
 from recipe import serializers
 
 
+# we will use viewsets for CRUD api. Otherwise, we use viewAPI like user API.
 class RecipeViewSet(viewsets.ModelViewSet):
     """View for manage recipe API."""
     # most situations beside listing, we want to use RecipeDetailSerializer.

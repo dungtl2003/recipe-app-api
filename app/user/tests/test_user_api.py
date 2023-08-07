@@ -10,7 +10,6 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
 ME_URL = reverse('user:me')
@@ -41,6 +40,7 @@ class PublicUserApiTest(TestCase):
         # assert that we create user successfully.
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         user = get_user_model().objects.get(email=payload['email'])
+        self.assertEqual(user.name, payload['name'])
         # assert that the database has the user we just created with correct
         # information by checking the password.
         self.assertTrue(user.check_password(payload['password']))
@@ -92,8 +92,9 @@ class PublicUserApiTest(TestCase):
         }
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        # if success, res data will have token.
+        self.assertIn('token', res.data)
 
     def test_create_token_bad_credentials(self):
         """Test return error if credentials invalid."""
@@ -110,8 +111,8 @@ class PublicUserApiTest(TestCase):
         payload = {'email': 'test@example.com', 'password': ''}
         res = self.client.post(TOKEN_URL, payload)
 
-        self.assertNotIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
 
     def test_retrieve_user_unauthorized(self):
         """Test authentication is required for users."""
@@ -136,10 +137,8 @@ class PrivateUserApiTests(TestCase):
         res = self.client.get(ME_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, {
-            'name': self.user.name,
-            'email': self.user.email,
-        })
+        self.assertEqual(self.user.name, res.data['name'])
+        self.assertEqual(self.user.email, res.data['email'])
 
     def test_post_me_not_allowed(self):
         """Test POST is not allowed for the "me" endpoint"""
@@ -156,7 +155,9 @@ class PrivateUserApiTests(TestCase):
 
         res = self.client.patch(ME_URL, payload)
 
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
         self.user.refresh_from_db()
+
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
