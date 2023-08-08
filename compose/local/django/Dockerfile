@@ -7,7 +7,7 @@ ARG APP_HOME='/recipe/app/'
 
 COPY ./Pipfile ./Pipfile.lock ${ROOT_PROJECT}
 COPY ./app ${APP_HOME}
-COPY --chmod=777 ./compose/local/django/start ${ROOT_PROJECT}
+COPY ./compose/local/django/start ${ROOT_PROJECT}
 
 WORKDIR ${ROOT_PROJECT}
 
@@ -31,11 +31,14 @@ RUN mkdir .venv && \
 		then pipenv install --dev --deploy ; \
 	fi && \
     apk del .tmp-build-deps && \
-	chmod -R 777 ${APP_HOME} && \
     adduser \
 	--disabled-password \
 	--no-create-home \
-	django-user
+	django-user && \
+    mkdir -p /vol/web/media && \
+    mkdir -p /vol/web/static && \
+    chown -R django-user:django-user /vol ${ROOT_PROJECT} && \
+    chmod -R 755 /vol ${ROOT_PROJECT}
 
 ENV PATH="${ROOT_PROJECT}/.venv/bin:$PATH"
 
