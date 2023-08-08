@@ -13,6 +13,7 @@ from rest_framework.test import APIClient
 from core.models import (
     Recipe,
     Tag,
+    Ingredient,
 )
 
 from recipe.serializers import (
@@ -362,3 +363,63 @@ class PrivateRecipeAPITests(TestCase):
         self.assertEqual(recipe.tags.count(), 2)
         self.assertIn(tag_1, recipe.tags.all())
         self.assertIn(tag_2, recipe.tags.all())
+
+    def test_create_recipe_with_new_ingredients(self):
+        """Test creating a new recipe with new ingredients."""
+        payload = {
+            'title': 'Fried egg',
+            'time_minutes': 20,
+            'price': Decimal('10.99'),
+            'ingredients': [
+                {'name': 'Salt'},
+                {'name': 'Pepple'},
+                {'name': 'Egg'},
+            ]
+        }
+        res = self.client.post(RECIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        recipes = Recipe.objects.filter(title=payload['title'])
+
+        self.assertEqual(recipes.count(), 1)
+
+        recipe = recipes[0]
+        ingredients = recipe.ingredients.all()
+
+        self.assertEqual(ingredients.count(), len(payload['ingredients']))
+        for ingredient in payload['ingredients']:
+            exists = ingredients.filter(name=ingredient['name']).exists()
+            self.assertTrue(exists)
+
+    def test_create_recipe_with_existing_ingredients(self):
+        """Test creating recipe with existing ingredients."""
+        salt = Ingredient.objects.create(
+            user=self.user,
+            name='Salt',
+        )
+        payload = {
+            'title': 'Sample title',
+            'time_minutes': 12,
+            'price': Decimal('4.99'),
+            'ingredients': [
+                {'name': 'Salt'},
+                {'name': 'Pepple'},
+                {'name': 'Egg'},
+            ]
+        }
+        res = self.client.post(RECIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        recipes = Recipe.objects.filter(title=payload['title'])
+
+        self.assertEqual(recipes.count(), 1)
+
+        recipe = recipes[0]
+        ingredients = recipe.ingredients.all()
+
+        self.assertIn(salt, ingredients)
+        for ingredient in payload['ingredients']:
+            exists = ingredients.filter(name=ingredient['name']).exists()
+            self.assertTrue(exists)
