@@ -11,6 +11,7 @@ from rest_framework import (
 from core.models import (
     Recipe,
     Tag,
+    Ingredient,
 )
 
 from recipe import serializers
@@ -78,21 +79,41 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-# In RecipeViewSet, we extend ModelViewSet because we can perform all CRUD
-# operations on recipe. But in TagViewSet, we can not create tag in recipe,
-# tag must be created in user to avoid duplication, so we will use mixins.
-# Note that we HAVE TO extend all mixin first and then the base class like
-# GenericViewSet. Otherwise, it will lose functionalities.
-class TagViewSet(mixins.UpdateModelMixin,
-                 mixins.ListModelMixin,
-                 mixins.DestroyModelMixin,
-                 viewsets.GenericViewSet):
-    """Manage tags in the database."""
-    serializer_class = serializers.TagSerializer
-    queryset = Tag.objects.all()
+# Refactoring note: In this viewsets, we should refactor to reduce duplication
+# in code. Both tag and ingredient share the same functionality, so we can
+# safety make base class for both of them. You may think serializers
+# module can be done the same, but although they work the same way, the way
+# to implement them are different, so we can not refactor that. As for the
+# test module, a lot of functions have the same line of code, but you should
+# not refactor them because they don't have any relationship to each other.
+# Each test is for different cases, and they don't have the same purpose
+# (beside for testing).
+# Inconclusion, for now, only good place to refactor is this module.
+class BaseRecipeAttrViewSet(mixins.UpdateModelMixin,
+                            mixins.ListModelMixin,
+                            mixins.DestroyModelMixin,
+                            viewsets.GenericViewSet):
+    """Base viewset for recipe attributes."""
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """retrieve tags for authenticated user."""
         return self.queryset.filter(user=self.request.user).order_by('-name')
+
+
+# In RecipeViewSet, we extend ModelViewSet because we can perform all CRUD
+# operations on recipe. But in TagViewSet, we can not create tag in recipe,
+# tag must be created in user to avoid duplication, so we will use mixins.
+# Note that we HAVE TO extend all mixin first and then the base class like
+# GenericViewSet. Otherwise, it will lose functionalities.
+class TagViewSet(BaseRecipeAttrViewSet):
+    """Manage tags in the database."""
+    serializer_class = serializers.TagSerializer
+    queryset = Tag.objects.all()
+
+
+class IngredientViewSet(BaseRecipeAttrViewSet):
+    """Manage ingredients in the database."""
+    serializer_class = serializers.IngredientSerializer
+    queryset = Ingredient.objects.all()
