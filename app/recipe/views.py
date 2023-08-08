@@ -11,6 +11,7 @@ from rest_framework import (
 from core.models import (
     Recipe,
     Tag,
+    Ingredient,
 )
 
 from recipe import serializers
@@ -96,3 +97,21 @@ class TagViewSet(mixins.UpdateModelMixin,
     def get_queryset(self):
         """retrieve tags for authenticated user."""
         return self.queryset.filter(user=self.request.user).order_by('-name')
+
+
+class IngredientViewSet(mixins.ListModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet):
+    """Manage ingredients in the database."""
+    serializer_class = serializers.IngredientSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Ingredient.objects.all()
+
+    def get_queryset(self):
+        """retrieve ingredients for authenticated user."""
+        return (Ingredient
+                .objects
+                .filter(user=self.request.user)
+                .order_by('-name'))
