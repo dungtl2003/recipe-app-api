@@ -2,6 +2,7 @@ version: "3"
 
 volumes:
   dev-db-data:
+  dev-static-data:
 
 services:
   app:
@@ -16,6 +17,7 @@ services:
       - "8000:8000"
     volumes:
       - ./app/:/recipe/app/
+      - dev-static-data:/vol/web/
     env_file:
       - ./.envs/.local/.django
     depends_on:
