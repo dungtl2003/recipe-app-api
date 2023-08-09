@@ -55,7 +55,7 @@ USER django-user
 
 # default command for docker container to run uWSGI server. When develop, we usually override this to python3 manage.py
 # runserver.
-CMD ["run.sh"]
+CMD ["start"]
 
 
 

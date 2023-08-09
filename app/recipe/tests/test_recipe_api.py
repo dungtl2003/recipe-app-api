@@ -546,7 +546,7 @@ class ImageUploadTests(TestCase):
         self.client.force_authenticate(self.user)
         self.recipe = create_recipe(self.user)
 
-    # This will run after every test, oposite to setUp() method.
+    # This will start after every test, oposite to setUp() method.
     # Because we don't want to save test images in our machine.
     def tearDown(self):
         self.recipe.image.delete()
