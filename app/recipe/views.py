@@ -6,7 +6,10 @@ from rest_framework import (
     mixins,
     authentication,
     permissions,
+    status,
 )
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from core.models import (
     Recipe,
@@ -68,6 +71,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # if action is list, we return RecipeSerializer.
         if self.action == 'list':
             return serializers.RecipeSerializer
+        elif self.action == 'upload_image':
+            return serializers.RecipeImageSerializer
 
         return self.serializer_class
 
@@ -77,6 +82,43 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # add the current user (the user wants to create recipe) into the
         # recipe and then save the recipe.
         serializer.save(user=self.request.user)
+
+    # detail: a boolean that indicates whether the action applies to a single
+    # instance or the whole collection. In this case, detail=True, which means
+    # the action requires a primary key argument to identify the instance.
+
+    # url_path: a string that defines the URL path for the action. In this
+    # case, it's 'upload-image', which means the action can be accessed at
+    # /recipes/{pk}/upload-image/. Note that the path has pk because
+    # detail=True. If detail=False, then the path will be
+    # /recipes/upload-image/.
+
+    # Normally, the action function takes 1 argument: request. But because
+    # detail=True, the action function will also take pk argument.
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    def upload_image(self, request, pk=None):
+        """Upload an image to recipe."""
+        # Get the recipe instance from the database using the pk.
+        recipe = self.get_object()
+        # This will return RecipeImageSerializer(recipe, data=request.data),
+        # which will be converted to serializer object.
+
+        # data: the data will be used to update or create the instance.
+        # In this case, data will be used to update recipe.
+
+        # Detail: the recipe has title, price, description, etc. But we want
+        # to serializer it into RecipeImageSerializer, which only needs id,
+        # image. We also pass the data in to update the recipe object. If
+        # the data is valid - serializer is valid, we can save the instance to
+        # the database using serializer.save(). If not, then we will not save
+        # and return bad request respone.
+        serializer = self.get_serializer(recipe, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Refactoring note: In this viewsets, we should refactor to reduce duplication
