@@ -1,7 +1,6 @@
 """
 Tests for the tag API.
 """
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
@@ -9,6 +8,11 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from recipe.serializers import TagSerializer
+from recipe.utils.create_object import (
+    create_tag,
+    create_recipe,
+    create_user,
+)
 
 from core.models import Tag
 
@@ -18,26 +22,6 @@ TAGS_URL = reverse('recipe:tag-list')
 def detail_url(tag_id):
     """Create and return a tag detail url."""
     return reverse('recipe:tag-detail', args=[tag_id])
-
-
-def create_tag(user, **kwargs):
-    """Create and return tag."""
-    defaults = {
-        'name': 'Sample tag',
-        'user': user,
-    }
-    defaults.update(kwargs)
-    return Tag.objects.create(**defaults)
-
-
-def create_user(**kwargs):
-    """Create and return a user."""
-    defaults = {
-        'email': 'test@example.com',
-        'password': 'samplepass123',
-    }
-    defaults.update(kwargs)
-    return get_user_model().objects.create_user(**defaults)
 
 
 class PublicTagApiTests(TestCase):
@@ -118,3 +102,41 @@ class PrivateTagApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Tag.objects.filter(id=tag.id).exists())
+
+    def test_filter_tags_assigned_to_recipe(self):
+        """Test filtering only tags that are assigned to a recipe."""
+        tag1 = create_tag(user=self.user, name='Breakfast')
+        tag2 = create_tag(user=self.user, name='Lunch')
+        tag3 = create_tag(user=self.user, name='Dinner')
+        r1 = create_recipe(user=self.user, title='Fried egg')
+        r2 = create_recipe(user=self.user, title='Pulled pork bread')
+        r1.tags.add(tag1)
+        r2.tags.add(tag2)
+
+        params = {'assigned_only': 1}
+        res = self.client.get(TAGS_URL, params)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        s1 = TagSerializer(tag1)
+        s2 = TagSerializer(tag2)
+        s3 = TagSerializer(tag3)
+
+        self.assertIn(s1.data, res.data)
+        self.assertIn(s2.data, res.data)
+        self.assertNotIn(s3.data, res.data)
+
+    def test_filtered_tags_unique(self):
+        """Test filtered tags are unique."""
+        tag = create_tag(user=self.user, name='Breakfast')
+        create_tag(user=self.user, name='Lunch')
+        recipe1 = create_recipe(user=self.user, title='Fried egg')
+        recipe2 = create_recipe(user=self.user, title='Steak')
+        recipe1.tags.add(tag)
+        recipe2.tags.add(tag)
+
+        params = {'assigned_only': 1}
+        res = self.client.get(TAGS_URL, params)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
