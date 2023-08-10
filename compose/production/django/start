@@ -13,4 +13,10 @@ python3 manage.py migrate
 # master: enables master process mode
 # enable-threads: allows each worker to run multiple threads
 # module app.wsgi: loads the WSGI module from the app package
+
+# let say you have a server working on port 80 and you map port 80:8000 to nginx container, django app open on port
+# 9000, postgresql opens on port 5432. When you make a request on the server port 80, it will send your request to
+# nginx container, this reverse proxy will make decisions. If you want to get static files, then it will take the static
+# files you need directly in static storage. If not, then it will pass the request to django app uwsgi on port 9000.
+# After that, django can then access to database on port 5432 to get the data and return a respone.
 uwsgi --socket :9000 --workers 4 --master --enable-threads --module app.wsgi

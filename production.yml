@@ -18,7 +18,10 @@ services:
       - ./.envs/.production/.postgres
       - ./.envs/.production/.django
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    command:
+      - /scripts/production/start
 
   db:
     image: postgres:15-alpine

@@ -2,8 +2,8 @@ FROM python:3.10-alpine
 LABEL maintainer="ilikeblue"
 
 ENV PYTHONUNBUFFERED 1
-ARG ROOT_PROJECT="/recipe/"
-ARG APP_HOME='/recipe/app/'
+ARG ROOT_PROJECT="/recipe"
+ARG APP_HOME='/recipe/app'
 ARG DEV=false
 
 WORKDIR ${ROOT_PROJECT}
@@ -27,9 +27,12 @@ RUN mkdir .venv && \
 
 COPY ./Pipfile ./Pipfile.lock ${ROOT_PROJECT}
 COPY ./app ${APP_HOME}
-COPY ./scripts /scripts
-COPY ./compose/local/django/start ${ROOT_PROJECT}
+COPY ./compose/production/django/start /scripts/production/start
+COPY ./compose/local/django/start /scripts/local/start
 
+# r: only able to read, ex: cat file, ls -l directory.
+# w: able to edit the file, create, rename, delete files inside that directory.
+# x: able to run a file or cd to directory.
 RUN pipenv install --deploy && \
 	if [ ${DEV} = "true" ]; \
 		then pipenv install --dev --deploy ; \
@@ -45,7 +48,7 @@ RUN pipenv install --deploy && \
     chmod -R 755 /vol ${ROOT_PROJECT} && \
     chmod -R +x /scripts
 
-ENV PATH="/scripts:${ROOT_PROJECT}.venv/bin:$PATH"
+ENV PATH="/scripts:${ROOT_PROJECT}/.venv/bin:$PATH"
 
 WORKDIR ${APP_HOME}
 
@@ -53,10 +56,3 @@ EXPOSE 8000
 
 #switch user
 USER django-user
-
-# default command for docker container to run uWSGI server. When develop, we usually override this to python3 manage.py
-# runserver.
-CMD ["start"]
-
-
-
