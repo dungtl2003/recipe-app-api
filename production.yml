@@ -1,0 +1,51 @@
+version: "3"
+
+volumes:
+  db-data:
+  static-data:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: django-recipe-production
+    container_name: django-recipe-production
+    restart: always
+    volumes:
+      - static-data:/vol/web
+    env_file:
+      - ./.envs/.production/.postgres
+      - ./.envs/.production/.django
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - /scripts/production/start
+
+  db:
+    image: postgres:15-alpine
+    container_name: recipe-db-production
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    env_file:
+      - ./.envs/.production/.postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  proxy:
+    build:
+      context: ./compose/production/proxy
+    image: recipe-proxy
+    container_name: recipe-proxy
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "80:8000"
+    volumes:
+      - static-data:/vol/static

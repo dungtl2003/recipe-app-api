@@ -1,5 +1,1 @@
-DB_HOST=db
-DB_PORT=5432
-DB_NAME=devdb
-DB_USER=ilikeblue
-DB_PASS=270403
+DEBUG=0
