@@ -4,11 +4,7 @@ LABEL maintainer="ilikeblue"
 ENV PYTHONUNBUFFERED 1
 ARG ROOT_PROJECT="/recipe/"
 ARG APP_HOME='/recipe/app/'
-
-COPY ./Pipfile ./Pipfile.lock ${ROOT_PROJECT}
-COPY ./app ${APP_HOME}
-COPY ./scripts /scripts
-COPY ./compose/local/django/start ${ROOT_PROJECT}
+ARG DEV=false
 
 WORKDIR ${ROOT_PROJECT}
 
@@ -22,14 +18,19 @@ WORKDIR ${ROOT_PROJECT}
 # installed, all other packages only need for installing pillow (python image library), so we can remove it afterward.
 
 # linux-headers, build-base, pcre, pcre-dev are required for uWSGI server installation.
-ARG DEV=false
 RUN mkdir .venv && \
 	pip install --upgrade --no-cache-dir pip && \
-    apk add --update --no-cache postgresql-client jpeg-dev pcre pcre-dev build-base && \
+    apk add --update --no-cache postgresql-client jpeg-dev pcre && \
     apk add --update --no-cache --virtual .tmp-build-deps \
-      build-base postgresql-dev musl-dev zlib zlib-dev gcc python3-dev linux-headers && \
-	pip install --no-cache-dir pipenv && \
-    pipenv install --deploy && \
+      build-base postgresql-dev musl-dev zlib zlib-dev gcc python3-dev pcre-dev linux-headers && \
+	pip install --no-cache-dir pipenv
+
+COPY ./Pipfile ./Pipfile.lock ${ROOT_PROJECT}
+COPY ./app ${APP_HOME}
+COPY ./scripts /scripts
+COPY ./compose/local/django/start ${ROOT_PROJECT}
+
+RUN pipenv install --deploy && \
 	if [ ${DEV} = "true" ]; \
 		then pipenv install --dev --deploy ; \
 	fi && \
