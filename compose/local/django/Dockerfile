@@ -2,8 +2,8 @@ FROM python:3.10-alpine
 LABEL maintainer="ilikeblue"
 
 ENV PYTHONUNBUFFERED 1
-ARG ROOT_PROJECT="/recipe"
-ARG APP_HOME='/recipe/app'
+ARG ROOT_PROJECT="/recipe/"
+ARG APP_HOME="/recipe/app/"
 ARG DEV=false
 
 WORKDIR ${ROOT_PROJECT}
@@ -48,7 +48,7 @@ RUN pipenv install --deploy && \
     chmod -R 755 /vol ${ROOT_PROJECT} && \
     chmod -R +x /scripts
 
-ENV PATH="/scripts:${ROOT_PROJECT}/.venv/bin:$PATH"
+ENV PATH="/scripts:${ROOT_PROJECT}.venv/bin:$PATH"
 
 WORKDIR ${APP_HOME}
 
