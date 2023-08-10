@@ -1,7 +1,7 @@
 ---
 name: Checks # name will be shown on GitHub
 
-on: [push] # trigger, tell GitHub to start action on push
+on: [push] # trigger, tell GitHub to run action on push
 
 jobs:
   test-lint: # ID
@@ -16,9 +16,9 @@ jobs:
       - name: Checkout # This step will be executed if the first one is executed successfully
         uses: actions/checkout@v2
       - name: Test
-        run: docker compose -f local.yml start --rm app sh -c "python3 manage.py test"
+        run: docker compose -f local.yml run --rm app sh -c "python3 manage.py test"
       - name: Lint
-        run: docker compose -f local.yml start --rm app sh -c "flake8"
+        run: docker compose -f local.yml run --rm app sh -c "flake8"
 
   # Conclusion: the job test-lint will start on ubuntu v20.04 OS, the first step is trying to log in to Docker Hub using
   # secrets set up in GitHub and login docker action v1 (a built-in container). If this step works, it will use checkout
