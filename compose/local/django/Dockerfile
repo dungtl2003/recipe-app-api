@@ -21,11 +21,11 @@ WORKDIR ${ROOT_PROJECT}
 # python3-dev, zlib and zlib-dev in order to install this library. Except jpeg-dev, we need this after the image is
 # installed, all other packages only need for installing pillow (python image library), so we can remove it afterward.
 
-# linux-headers is required for uWSGI server installation.
+# linux-headers, build-base, pcre, pcre-dev are required for uWSGI server installation.
 ARG DEV=false
 RUN mkdir .venv && \
 	pip install --upgrade --no-cache-dir pip && \
-    apk add --update --no-cache postgresql-client jpeg-dev && \
+    apk add --update --no-cache postgresql-client jpeg-dev pcre pcre-dev build-base && \
     apk add --update --no-cache --virtual .tmp-build-deps \
       build-base postgresql-dev musl-dev zlib zlib-dev gcc python3-dev linux-headers && \
 	pip install --no-cache-dir pipenv && \
@@ -44,7 +44,7 @@ RUN mkdir .venv && \
     chmod -R 755 /vol ${ROOT_PROJECT} && \
     chmod -R +x /scripts
 
-ENV PATH="/scripts:/${ROOT_PROJECT}/.venv/bin:$PATH"
+ENV PATH="/scripts:${ROOT_PROJECT}.venv/bin:$PATH"
 
 WORKDIR ${APP_HOME}
 

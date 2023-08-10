@@ -1,7 +1,7 @@
 version: "3"
 
 volumes:
-  postgres-data:
+  db-data:
   static-data:
 
 services:
@@ -25,7 +25,7 @@ services:
     container_name: recipe-db-production
     restart: always
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     env_file:
       - ./.envs/.production/.postgres
     healthcheck:

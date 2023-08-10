@@ -20,6 +20,7 @@ services:
       - dev-static-data:/vol/web/
     env_file:
       - ./.envs/.local/.postgres
+      - ./.envs/.local/.django
     depends_on:
       db:
         condition: service_healthy

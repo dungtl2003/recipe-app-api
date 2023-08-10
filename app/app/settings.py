@@ -21,12 +21,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-jhh8^35ok#w^#9k##%yqo)cnf-3kf78z!w)$#u5!hkpzn&_p6o'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'changeme')
 
 # SECURITY WARNING: don't start with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(os.environ.get('DEBUG', 0)))
 
+# If you don't specify any allowed host, then filter will give None and
+# ALLOWED_HOSTS will not extend anything. Else, it will extend all values
+# in DJANGO_ALLOWED_HOSTS variable.
 ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS.extend(
+    filter(
+        None,
+        os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(','),
+    )
+)
 
 
 # Application definition
@@ -84,9 +93,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'HOST': os.environ.get('POSTGRES_HOST'),
-        'NAME': os.environ.get('POSTGRES_NAME'),
+        'NAME': os.environ.get('POSTGRES_DB'),
         'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASS'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'PORT': os.environ.get('POSTGRES_PORT')
     }
 }
