@@ -29,7 +29,7 @@ DEBUG = bool(int(os.environ.get('DEBUG', 0)))
 # If you don't specify any allowed host, then filter will give None and
 # ALLOWED_HOSTS will not extend anything. Else, it will extend all values
 # in DJANGO_ALLOWED_HOSTS variable.
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 ALLOWED_HOSTS.extend(
     filter(
         None,
@@ -92,11 +92,11 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get('POSTGRES_HOST'),
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'PORT': os.environ.get('POSTGRES_PORT')
+        'HOST': os.environ.get('POSTGRES_HOST', 'host'),
+        'NAME': os.environ.get('POSTGRES_DB', 'db'),
+        'USER': os.environ.get('POSTGRES_USER', 'user'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'password'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432')
     }
 }
 
