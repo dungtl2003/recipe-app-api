@@ -4,7 +4,6 @@ LABEL maintainer="ilikeblue"
 ENV PYTHONUNBUFFERED 1
 ARG ROOT_PROJECT="/recipe/"
 ARG APP_HOME="/recipe/app/"
-ARG DEV=false
 
 WORKDIR ${ROOT_PROJECT}
 
@@ -27,16 +26,13 @@ RUN mkdir .venv && \
 
 COPY ./Pipfile ./Pipfile.lock ${ROOT_PROJECT}
 COPY ./app ${APP_HOME}
-COPY ./compose/production/django/start /scripts/production/start
 COPY ./compose/local/django/start /scripts/local/start
 
 # r: only able to read, ex: cat file, ls -l directory.
 # w: able to edit the file, create, rename, delete files inside that directory.
 # x: able to run a file or cd to directory.
 RUN pipenv install --deploy && \
-	if [ ${DEV} = "true" ]; \
-		then pipenv install --dev --deploy ; \
-	fi && \
+	pipenv install --dev --deploy && \
     apk del .tmp-build-deps && \
     adduser \
 	--disabled-password \

@@ -1,2 +1,2 @@
 DEBUG=1
-DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,mycookbox

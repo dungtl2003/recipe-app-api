@@ -9,8 +9,6 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-      args:
-        - DEV=true
     image: django-recipe
     container_name: django-recipe
     ports:
